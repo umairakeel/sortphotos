@@ -22,7 +22,6 @@ import filecmp
 from datetime import datetime, timedelta
 import re
 import locale
-from time import gmtime, strftime
 
 # Setting locale to the 'local' value
 locale.setlocale(locale.LC_ALL, '')
@@ -248,7 +247,7 @@ def sortPhotos(src_dir, dest_dir, sort_format, rename_format, recursive=False,
     recursive : bool
         True if you want src_dir to be searched recursively for files (False to search only in top-level of src_dir)
     copy_files : bool
-       True if you want files to be copied over from src_dir to dest_dir rather than moved
+        True if you want files to be copied over from src_dir to dest_dir rather than moved
     test : bool
         True if you just want to simulate how the files will be moved without actually doing any moving/copying
     remove_duplicates : bool
@@ -308,22 +307,6 @@ def sortPhotos(src_dir, dest_dir, sort_format, rename_format, recursive=False,
     num_files = len(metadata)
     print()
 
-    # setup duplicate file
-    log_file_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-
-    dup_file_log = open('duplicates.txt','a')
-    dup_file_log.write ('\n-----------------------------------------');
-    dup_file_log.write(log_file_time)
-    dup_file_log.write('-----------------------------------------\n');
-
-    dup_file_dict = {}
-
-    nodate_file_log = open('nodates.txt','a')
-    nodate_file_log.write ('\n-----------------------------------------');
-    nodate_file_log.write(log_file_time)
-    nodate_file_log.write('-----------------------------------------\n');
-    nodate_dict = {}
-
     if test:
         test_file_dict = {}
 
@@ -352,8 +335,6 @@ def sortPhotos(src_dir, dest_dir, sort_format, rename_format, recursive=False,
 
         # check if no valid date found
         if not date:
-            nodate_file_log.write(src_file + '\n')
-            nodate_dict[src_file] = 1
             if verbose:
                 print('No valid dates were found using the specified tags.  File will remain where it is.')
                 print()
@@ -388,7 +369,7 @@ def sortPhotos(src_dir, dest_dir, sort_format, rename_format, recursive=False,
 
         if rename_format is not None:
             _, ext = os.path.splitext(filename)
-            filename = date.strftime(rename_format) + _ +  ext.lower()
+            filename = date.strftime(rename_format) + ext.lower()
 
         # setup destination file
         dest_file = os.path.join(dest_file, filename.encode('utf-8'))
@@ -415,8 +396,6 @@ def sortPhotos(src_dir, dest_dir, sort_format, rename_format, recursive=False,
                 else:
                     dest_compare = dest_file
                 if remove_duplicates and filecmp.cmp(src_file, dest_compare):  # check for identical files
-                    dup_file_dict[src_file] = dest_compare
-                    dup_file_log.write(src_file + ", " + dest_compare + '\n');
                     fileIsIdentical = True
                     if verbose:
                         print('Identical file already exists.  Duplicate will be ignored.\n')
@@ -451,15 +430,11 @@ def sortPhotos(src_dir, dest_dir, sort_format, rename_format, recursive=False,
         if verbose:
             print()
             # sys.stdout.flush()
-            
-            
+
+
     if not verbose:
         print()
-    dup_file_log.close()
-    nodate_file_log.close()
-    print ('\n Summary \n')
-    print ('Duplicates found ' + str(len(dup_file_dict)) + '\n')
-    print ('No Dates ' + str(len(nodate_dict)) + '\n')
+
 
 def main():
     import argparse
